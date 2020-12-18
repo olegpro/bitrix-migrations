@@ -6,12 +6,7 @@ use Arrilot\BitrixMigrations\Migrator;
 
 class MigrateCommand extends AbstractCommand
 {
-    /**
-     * Migrator instance.
-     *
-     * @var Migrator
-     */
-    protected $migrator;
+    protected Migrator $migrator;
 
     protected static $defaultName = 'migrate';
     /**
@@ -30,17 +25,15 @@ class MigrateCommand extends AbstractCommand
     /**
      * Configures the current command.
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setDescription('Run all outstanding migrations');
     }
 
     /**
      * Execute the console command.
-     *
-     * @return null|int
      */
-    protected function fire()
+    protected function fire(): ?int
     {
         $toRun = $this->migrator->getMigrationsToRun();
 
@@ -52,5 +45,7 @@ class MigrateCommand extends AbstractCommand
         } else {
             $this->info('Nothing to migrate');
         }
+
+        return 0;
     }
 }

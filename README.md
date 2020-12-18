@@ -266,3 +266,9 @@ Arrilot\BitrixMigrations\Autocreate\Manager::init($_SERVER["DOCUMENT_ROOT"].'/mi
 
 3) По желанию отключить существующие шаблоны миграций, сделав свои.
 
+### Запуск тестов
+
+```
+1. docker build --no-cache --file ./Dockerfile --tag arrilot-bitrix-migrations .
+2. docker run --rm -v `pwd`:/app arrilot-bitrix-migrations composer install
+3. docker run --rm -v `pwd`:/app arrilot-bitrix-migrations ./vendor/bin/phpunit tests

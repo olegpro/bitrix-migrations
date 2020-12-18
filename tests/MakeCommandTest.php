@@ -2,24 +2,29 @@
 
 namespace Arrilot\Tests\BitrixMigrations;
 
-use Mockery as m;
+use Arrilot\BitrixMigrations\Commands\MakeCommand;
+use Arrilot\BitrixMigrations\Migrator;
+use Symfony\Component\Console\Tester\CommandTester;
 
 class MakeCommandTest extends CommandTestCase
 {
-    protected function mockCommand($migrator)
+    public function testItCreatesAMigrationFile(): void
     {
-        return m::mock('Arrilot\BitrixMigrations\Commands\MakeCommand[abort, info, message, getMigrationObjectByFileName]', [$migrator])
-            ->shouldAllowMockingProtectedMethods();
-    }
+        $migrator = $this->createMock(Migrator::class);
+        $migrator
+            ->expects($this->once())
+            ->method('createMigration')
+            ->willReturn('2015_11_26_162220_bar');
 
-    public function testItCreatesAMigrationFile()
-    {
-        $migrator = m::mock('Arrilot\BitrixMigrations\Migrator');
-        $migrator->shouldReceive('createMigration')->once()->andReturn('2015_11_26_162220_bar');
+        $command = new MakeCommand($migrator);
 
-        $command = $this->mockCommand($migrator);
-        $command->shouldReceive('message')->once();
+        $commandTester = new CommandTester($command);
 
-        $this->runCommand($command, ['name' => 'test_migration']);
+        $commandTester->execute([
+            'name' => 'test_migration',
+        ]);
+
+        $output = $commandTester->getDisplay();
+        $this->assertStringContainsString('Migration created: 2015_11_26_162220_bar.php', $output);
     }
 }
