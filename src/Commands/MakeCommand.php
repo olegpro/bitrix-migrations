@@ -8,12 +8,7 @@ use Symfony\Component\Console\Input\InputOption;
 
 class MakeCommand extends AbstractCommand
 {
-    /**
-     * Migrator instance.
-     *
-     * @var Migrator
-     */
-    protected $migrator;
+    protected Migrator $migrator;
 
     protected static $defaultName = 'make';
 
@@ -33,7 +28,7 @@ class MakeCommand extends AbstractCommand
     /**
      * Configures the current command.
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setDescription('Create a new migration file')
             ->addArgument(
@@ -57,10 +52,8 @@ class MakeCommand extends AbstractCommand
 
     /**
      * Execute the console command.
-     *
-     * @return null|int
      */
-    protected function fire()
+    protected function fire(): ?int
     {
         $migration = $this->migrator->createMigration(
             $this->input->getArgument('name'),
@@ -70,5 +63,7 @@ class MakeCommand extends AbstractCommand
         );
 
         $this->message("<info>Migration created:</info> {$migration}.php");
+
+        return 0;
     }
 }

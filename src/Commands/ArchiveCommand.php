@@ -7,12 +7,7 @@ use Symfony\Component\Console\Input\InputOption;
 
 class ArchiveCommand extends AbstractCommand
 {
-    /**
-     * Migrator instance.
-     *
-     * @var Migrator
-     */
-    protected $migrator;
+    protected Migrator $migrator;
     protected static $defaultName = 'archive';
 
     /**
@@ -39,10 +34,8 @@ class ArchiveCommand extends AbstractCommand
 
     /**
      * Execute the console command.
-     *
-     * @return null|int
      */
-    protected function fire()
+    protected function fire(): ?int
     {
         $files = $this->migrator->getAllMigrations();
         $without = $this->input->getOption('without') ?: 0;

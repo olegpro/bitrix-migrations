@@ -44,20 +44,15 @@ abstract class AbstractCommand extends Command
      *
      * @return null|int null or 0 if everything went fine, or an error code.
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->input = $input;
         $this->output = $output;
 
         try {
-            return $this->fire();
+            return $this->fire() ?? 0;
         } catch (DomainException $e) {
             return 1;
-        } catch (Exception $e) {
-            $this->error($e->getMessage());
-            $this->error('Abort!');
-
-            return $e->getCode();
         }
     }
 
@@ -93,8 +88,6 @@ abstract class AbstractCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return null|int
      */
-    abstract protected function fire();
+    abstract protected function fire(): ?int;
 }

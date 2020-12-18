@@ -2,64 +2,98 @@
 
 namespace Arrilot\Tests\BitrixMigrations;
 
+use Arrilot\BitrixMigrations\Commands\RollbackCommand;
+use Arrilot\BitrixMigrations\Migrator;
 use Mockery as m;
+use Symfony\Component\Console\Tester\CommandTester;
 
 class RollbackCommandTest extends CommandTestCase
 {
-    protected function mockCommand($migrator)
+    public function testItRollbacksNothingIfThereIsNoMigrations(): void
     {
-        $command = 'Arrilot\BitrixMigrations\Commands\RollbackCommand[abort, info, message, getMigrationObjectByFileName,markRolledBackWithConfirmation]';
+        $migrator = $this->createMock(Migrator::class);
+        $migrator
+            ->expects($this->once())
+            ->method('getRanMigrations')
+            ->willReturn([]);
 
-        return m::mock($command, [$migrator])->shouldAllowMockingProtectedMethods();
+        $migrator
+            ->expects($this->never())
+            ->method('rollbackMigration');
+
+        $command = new RollbackCommand($migrator);
+
+        $commandTester = new CommandTester($command);
+
+        $commandTester->execute([]);
+
+        $output = $commandTester->getDisplay();
+        $this->assertStringContainsString('Nothing to rollback', $output);
     }
 
-    public function testItRollbacksNothingIfThereIsNoMigrations()
+    public function testItRollsBackTheLastMigration(): void
     {
-        $migrator = m::mock('Arrilot\BitrixMigrations\Migrator');
-        $migrator->shouldReceive('getRanMigrations')->once()->andReturn([]);
-        $migrator->shouldReceive('rollbackMigration')->never();
-        $migrator->shouldReceive('hardRollbackMigration')->never();
+        $migrator = $this->createMock(Migrator::class);
+        $migrator
+            ->expects($this->once())
+            ->method('getRanMigrations')
+            ->willReturn([
+                '2014_11_26_162220_foo',
+                '2015_11_26_162220_bar',
+            ]);
 
-        $command = $this->mockCommand($migrator);
-        $command->shouldReceive('info')->with('Nothing to rollback')->once();
+        $migrator
+            ->expects($this->once())
+            ->method('doesMigrationFileExist')
+            ->willReturn(true);
 
-        $this->runCommand($command);
+        $migrator
+            ->expects($this->once())
+            ->method('rollbackMigration');
+
+        $command = new RollbackCommand($migrator);
+
+        $commandTester = new CommandTester($command);
+
+        $commandTester->execute([]);
+
+        $output = $commandTester->getDisplay();
+        $this->assertStringContainsString('Rolled back: 2015_11_26_162220_bar', $output);
     }
 
-    public function testItRollsBackTheLastMigration()
+    public function testItRollbackNonExistingMigration(): void
     {
-        $migrator = m::mock('Arrilot\BitrixMigrations\Migrator');
-        $migrator->shouldReceive('getRanMigrations')->once()->andReturn([
-            '2014_11_26_162220_foo',
-            '2015_11_26_162220_bar',
-        ]);
-        $migrator->shouldReceive('doesMigrationFileExist')->once()->andReturn(true);
-        $migrator->shouldReceive('rollbackMigration')->once();
-        $migrator->shouldReceive('hardRollbackMigration')->never();
+        $migrator = $this->createMock(Migrator::class);
+        $migrator
+            ->expects($this->once())
+            ->method('getRanMigrations')
+            ->willReturn([
+                '2014_11_26_162220_foo',
+                '2015_11_26_162220_bar',
+            ]);
 
-        $command = $this->mockCommand($migrator);
-        $command->shouldReceive('info')->with('Nothing to rollback')->never();
-        $command->shouldReceive('message')->with('<info>Rolled back:</info> 2015_11_26_162220_bar.php')->once();
+        $migrator
+            ->expects($this->once())
+            ->method('doesMigrationFileExist')
+            ->willReturn(false);
 
-        $this->runCommand($command);
-    }
+        $migrator
+            ->expects($this->never())
+            ->method('rollbackMigration');
 
-    public function testItRollbackNonExistingMigration()
-    {
-        $migrator = m::mock('Arrilot\BitrixMigrations\Migrator');
-        $migrator->shouldReceive('getRanMigrations')->once()->andReturn([
-            '2014_11_26_162220_foo',
-            '2015_11_26_162220_bar',
-        ]);
-        $migrator->shouldReceive('doesMigrationFileExist')->once()->andReturn(false);
-        $migrator->shouldReceive('rollbackMigration')->never();
-        $migrator->shouldReceive('hardRollbackMigration')->never();
+        $command = new RollbackCommand($migrator);
 
-        $command = $this->mockCommand($migrator);
-        $command->shouldReceive('markRolledBackWithConfirmation')->with('2015_11_26_162220_bar')->once();
-        $command->shouldReceive('info')->with('Nothing to rollback')->never();
-        $command->shouldReceive('message')->with('<info>Rolled back:</info> 2015_11_26_162220_bar.php')->once();
+        $command->setHelperSet(
+            new \Symfony\Component\Console\Helper\HelperSet([
+                new \Symfony\Component\Console\Helper\QuestionHelper()
+            ])
+        );
 
-        $this->runCommand($command);
+        $commandTester = new CommandTester($command);
+
+        $commandTester->execute([]);
+
+        $output = $commandTester->getDisplay();
+        $this->assertStringContainsString('Do you want to mark it as rolled back', $output);
     }
 }

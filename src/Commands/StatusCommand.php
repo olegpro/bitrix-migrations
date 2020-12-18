@@ -6,12 +6,7 @@ use Arrilot\BitrixMigrations\Migrator;
 
 class StatusCommand extends AbstractCommand
 {
-    /**
-     * Migrator instance.
-     *
-     * @var Migrator
-     */
-    protected $migrator;
+    protected Migrator $migrator;
 
     protected static $defaultName = 'status';
 
@@ -31,17 +26,15 @@ class StatusCommand extends AbstractCommand
     /**
      * Configures the current command.
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setDescription('Show status about last migrations');
     }
 
     /**
      * Execute the console command.
-     *
-     * @return null|int
      */
-    protected function fire()
+    protected function fire(): ?int
     {
         $this->showOldMigrations();
 
@@ -52,10 +45,8 @@ class StatusCommand extends AbstractCommand
 
     /**
      * Show old migrations.
-     *
-     * @return void
      */
-    protected function showOldMigrations()
+    protected function showOldMigrations(): void
     {
         $old = collect($this->migrator->getRanMigrations());
 
@@ -75,10 +66,8 @@ class StatusCommand extends AbstractCommand
 
     /**
      * Show new migrations.
-     *
-     * @return void
      */
-    protected function showNewMigrations()
+    protected function showNewMigrations(): void
     {
         $new = collect($this->migrator->getMigrationsToRun());
 

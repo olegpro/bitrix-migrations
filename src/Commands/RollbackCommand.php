@@ -8,12 +8,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class RollbackCommand extends AbstractCommand
 {
-    /**
-     * Migrator instance.
-     *
-     * @var Migrator
-     */
-    protected $migrator;
+    protected Migrator $migrator;
 
     protected static $defaultName = 'rollback';
 
@@ -33,7 +28,7 @@ class RollbackCommand extends AbstractCommand
     /**
      * Configures the current command.
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setDescription('Rollback the last migration')
             ->addOption('hard', null, InputOption::VALUE_NONE, 'Rollback without running down()')
@@ -45,12 +40,14 @@ class RollbackCommand extends AbstractCommand
      *
      * @return null|int
      */
-    protected function fire()
+    protected function fire(): ?int
     {
         $ran = $this->migrator->getRanMigrations();
 
         if (empty($ran)) {
-            return $this->info('Nothing to rollback');
+            $this->info('Nothing to rollback');
+
+            return 0;
         }
 
         $migration = $ran[count($ran) - 1];

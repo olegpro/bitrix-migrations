@@ -2,36 +2,55 @@
 
 namespace Arrilot\Tests\BitrixMigrations;
 
-use Mockery as m;
+use Arrilot\BitrixMigrations\Commands\InstallCommand;
+use Arrilot\BitrixMigrations\Interfaces\DatabaseStorageInterface;
+use Symfony\Component\Console\Tester\CommandTester;
 
 class InstallCommandTest extends CommandTestCase
 {
-    protected function mockCommand($database)
+    public function testItCreatesMigrationTable(): void
     {
-        return m::mock('Arrilot\BitrixMigrations\Commands\InstallCommand[abort]', ['migrations', $database])
-            ->shouldAllowMockingProtectedMethods();
+        $database = $this->createMock(DatabaseStorageInterface::class);
+        $database
+            ->expects($this->once())
+            ->method('checkMigrationTableExistence')
+            ->willReturn(false);
+
+        $database
+            ->expects($this->once())
+            ->method('createMigrationTable');
+
+        $command = new InstallCommand('migrations', $database);
+
+        $commandTester = new CommandTester($command);
+
+        $commandTester->execute([]);
+
+        $output = $commandTester->getDisplay();
+        $this->assertStringContainsString('Migration table has been successfully created!', $output);
     }
 
-    public function testItCreatesMigrationTable()
+    public function testItDoesNotCreateATableIfItExists(): void
     {
-        $database = m::mock('Arrilot\BitrixMigrations\Interfaces\DatabaseStorageInterface');
-        $database->shouldReceive('checkMigrationTableExistence')->once()->andReturn(false);
-        $database->shouldReceive('createMigrationTable')->once();
+        $database = $this->createMock(DatabaseStorageInterface::class);
+        $database
+            ->expects($this->once())
+            ->method('checkMigrationTableExistence')
+            ->willReturn(true);
 
-        $command = $this->mockCommand($database);
+        $database
+            ->expects($this->never())
+            ->method('createMigrationTable');
 
-        $this->runCommand($command);
-    }
+        $command = new InstallCommand('migrations', $database);
 
-    public function testItDoesNotCreateATableIfItExists()
-    {
-        $database = m::mock('Arrilot\BitrixMigrations\Interfaces\DatabaseStorageInterface');
-        $database->shouldReceive('checkMigrationTableExistence')->once()->andReturn(true);
-        $database->shouldReceive('createMigrationTable')->never();
+        $commandTester = new CommandTester($command);
 
-        $command = $this->mockCommand($database);
-        $command->shouldReceive('abort')->once()->andThrow('DomainException');
+        $result = $commandTester->execute([]);
 
-        $this->runCommand($command);
+        $output = $commandTester->getDisplay();
+        $this->assertStringContainsString('already exists', $output);
+
+        $this->assertEquals(1, $result);
     }
 }

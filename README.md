@@ -4,7 +4,7 @@
 [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/arrilot/bitrix-migrations/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/arrilot/bitrix-migrations/)
 
 # Данный пакет больше активно не поддерживается
-
+arrilot/bitrix-migrations
 Причина - мы больше не используем Битрикс в своих проектах.
 Если вам интересен этот проект и вы хотите заняться его поддержкой - форкните его и создайте Issue в данном репозитории чтобы мы поместили здесь ссылку на форк.
 
@@ -266,3 +266,9 @@ Arrilot\BitrixMigrations\Autocreate\Manager::init($_SERVER["DOCUMENT_ROOT"].'/mi
 
 3) По желанию отключить существующие шаблоны миграций, сделав свои.
 
+### Запуск тестов
+
+```
+1. docker build --no-cache --file ./Dockerfile --tag arrilot-bitrix-migrations .
+2. docker run --rm -v `pwd`:/app arrilot-bitrix-migrations composer install
+3. docker run --rm -v `pwd`:/app arrilot-bitrix-migrations ./vendor/bin/phpunit tests

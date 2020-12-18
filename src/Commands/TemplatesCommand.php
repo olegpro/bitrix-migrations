@@ -8,12 +8,7 @@ use Symfony\Component\Console\Helper\TableSeparator;
 
 class TemplatesCommand extends AbstractCommand
 {
-    /**
-     * TemplatesCollection instance.
-     *
-     * @var TemplatesCollection
-     */
-    protected $collection;
+    protected TemplatesCollection $collection;
 
     protected static $defaultName = 'templates';
 
@@ -33,7 +28,7 @@ class TemplatesCommand extends AbstractCommand
     /**
      * Configures the current command.
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setDescription('Show the list of available migration templates');
     }
@@ -43,7 +38,7 @@ class TemplatesCommand extends AbstractCommand
      *
      * @return null|int
      */
-    protected function fire()
+    protected function fire(): ?int
     {
         $table = new Table($this->output);
         $table->setHeaders(['Name', 'Path', 'Description'])->setRows($this->collectRows());

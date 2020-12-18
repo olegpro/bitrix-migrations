@@ -2,40 +2,54 @@
 
 namespace Arrilot\Tests\BitrixMigrations;
 
-use Mockery as m;
+use Arrilot\BitrixMigrations\Commands\MigrateCommand;
+use Arrilot\BitrixMigrations\Migrator;
+use Symfony\Component\Console\Tester\CommandTester;
 
 class MigrateCommandTest extends CommandTestCase
 {
-    protected function mockCommand($migrator)
-    {
-        return m::mock('Arrilot\BitrixMigrations\Commands\MigrateCommand[abort, info, message, getMigrationObjectByFileName]', [$migrator])
-            ->shouldAllowMockingProtectedMethods();
-    }
-
     public function testItMigratesNothingIfThereIsNoOutstandingMigrations()
     {
-        $migrator = m::mock('Arrilot\BitrixMigrations\Migrator');
-        $migrator->shouldReceive('getMigrationsToRun')->once()->andReturn([]);
-        $migrator->shouldReceive('runMigration')->never();
+        $migrator = $this->createMock(Migrator::class);
+        $migrator
+            ->expects($this->once())
+            ->method('getMigrationsToRun')
+            ->willReturn([]);
 
-        $command = $this->mockCommand($migrator);
-        $command->shouldReceive('info')->with('Nothing to migrate')->once();
+        $migrator
+            ->expects($this->never())
+            ->method('runMigration');
 
-        $this->runCommand($command);
+        $command = new MigrateCommand($migrator);
+
+        $commandTester = new CommandTester($command);
+
+        $commandTester->execute([]);
+
+        $output = $commandTester->getDisplay();
+        $this->assertStringContainsString('Nothing to migrate', $output);
     }
 
     public function testItMigratesOutstandingMigrations()
     {
-        $migrator = m::mock('Arrilot\BitrixMigrations\Migrator');
-        $migrator->shouldReceive('getMigrationsToRun')->once()->andReturn([
-            '2015_11_26_162220_bar',
-        ]);
-        $migrator->shouldReceive('runMigration')->with('2015_11_26_162220_bar')->once();
+        $migrator = $this->createMock(Migrator::class);
+        $migrator
+            ->expects($this->once())
+            ->method('getMigrationsToRun')
+            ->willReturn(['2015_11_26_162220_bar']);
 
-        $command = $this->mockCommand($migrator);
-        $command->shouldReceive('message')->with('<info>Migrated:</info> 2015_11_26_162220_bar.php')->once();
-        $command->shouldReceive('info')->with('Nothing to migrate')->never();
+        $migrator
+            ->expects($this->once())
+            ->method('runMigration')
+            ->with('2015_11_26_162220_bar');
 
-        $this->runCommand($command);
+        $command = new MigrateCommand($migrator);
+
+        $commandTester = new CommandTester($command);
+
+        $commandTester->execute([]);
+
+        $output = $commandTester->getDisplay();
+        $this->assertStringContainsString('Migrated: 2015_11_26_162220_bar.php', $output);
     }
 }
