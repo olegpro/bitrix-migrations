@@ -4,7 +4,7 @@
 [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/arrilot/bitrix-migrations/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/arrilot/bitrix-migrations/)
 
 # Данный пакет больше активно не поддерживается
-arrilot/bitrix-migrations
+
 Причина - мы больше не используем Битрикс в своих проектах.
 Если вам интересен этот проект и вы хотите заняться его поддержкой - форкните его и создайте Issue в данном репозитории чтобы мы поместили здесь ссылку на форк.
 
