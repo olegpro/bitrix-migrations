@@ -50,5 +50,7 @@ class ArchiveCommand extends AbstractCommand
         } else {
             $this->info('Nothing to move');
         }
+
+        return 0;
     }
 }

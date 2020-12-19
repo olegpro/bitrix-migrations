@@ -44,6 +44,8 @@ class TemplatesCommand extends AbstractCommand
         $table->setHeaders(['Name', 'Path', 'Description'])->setRows($this->collectRows());
         $table->setStyle('borderless');
         $table->render();
+
+        return 0;
     }
 
     /**
